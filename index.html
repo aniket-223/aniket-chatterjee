@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Physics Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+      color: white;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+    }
+    .registration {
+      background-color: #1f1b2e;
+      padding: 30px;
+      border-radius: 10px;
+      animation: fadeIn 1s ease-in-out;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    }
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(-20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .question {
+      margin: 20px 0;
+      background-color: #211e3b;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+    .option {
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #3e3362;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .option:hover {
+      background-color: #7b4dff;
+    }
+    .hidden { display: none; }
+    .result { background: #251c3c; padding: 20px; border-radius: 10px; }
+    button {
+      background: #6c4ab4;
+      border: none;
+      padding: 10px 20px;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border: none;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="registration" class="registration">
+      <h2>Register for Physics Quiz</h2>
+      <input type="text" id="username" placeholder="Enter your name" />
+      <input type="text" id="institution" placeholder="Enter your Institution Name" />
+      <input type="text" id="phone" placeholder="Enter your Phone Number" />
+      <button onclick="startQuiz()">Start Quiz</button>
+    </div>
+
+    <div id="quiz" class="hidden">
+      <h2>Physics Quiz</h2>
+      <div id="questionContainer"></div>
+      <button onclick="submitQuiz()">Submit Quiz</button>
+    </div>
+
+    <div id="result" class="hidden">
+      <h2>Result</h2>
+      <div id="score"></div>
+      <div id="explanations"></div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        id: 1,
+        text: "What is the SI unit of force?",
+        options: ["Newton", "Pascal", "Joule", "Watt"],
+        answer: 0,
+        explanation: "Force is measured in Newtons (N)."
+      },
+      {
+        id: 2,
+        text: "What is acceleration due to gravity on Earth?",
+        options: ["9.8 m/s²", "8.9 m/s²", "10 m/s²", "11.2 m/s²"],
+        answer: 0,
+        explanation: "Standard gravity is 9.8 m/s²."
+      },
+      {
+        id: 3,
+        text: "Which of the following is a scalar quantity?",
+        options: ["Velocity", "Acceleration", "Force", "Speed"],
+        answer: 3,
+        explanation: "Speed has magnitude only, no direction."
+      },
+      {
+        id: 4,
+        text: "Unit of work is:",
+        options: ["Watt", "Newton", "Joule", "Pascal"],
+        answer: 2,
+        explanation: "Work is measured in Joules (J)."
+      },
+      {
+        id: 5,
+        text: "What is the formula for kinetic energy?",
+        options: ["1/2 mv²", "mv", "mg", "1/2 mv"],
+        answer: 0,
+        explanation: "K.E. = 1/2 mv²."
+      },
+      {
+        id: 6,
+        text: "Newton's third law is:",
+        options: ["F=ma", "Action = Reaction", "Inertia", "Energy is conserved"],
+        answer: 1,
+        explanation: "For every action, there is an equal and opposite reaction."
+      },
+      {
+        id: 7,
+        text: "Gravitational potential energy formula?",
+        options: ["mgh", "1/2 mv²", "mgv", "F*d"],
+        answer: 0,
+        explanation: "U = mgh is the formula for potential energy."
+      },
+      {
+        id: 8,
+        text: "A force of 10N is applied to move 2kg object. Acceleration?",
+        options: ["20 m/s²", "5 m/s²", "0.2 m/s²", "2 m/s²"],
+        answer: 1,
+        explanation: "F = ma, so a = F/m = 10/2 = 5."
+      },
+      {
+        id: 9,
+        text: "What is inertia?",
+        options: ["Tendency to change motion", "Mass", "Acceleration", "Speed"],
+        answer: 0,
+        explanation: "Inertia is resistance to motion change."
+      },
+      {
+        id: 10,
+        text: "Which law defines force as mass times acceleration?",
+        options: ["First Law", "Second Law", "Third Law", "Zeroth Law"],
+        answer: 1,
+        explanation: "Newton's Second Law defines F = ma."
+      },
+      {
+        id: 11,
+        text: "Work done when no displacement?",
+        options: ["Infinite", "Zero", "Maximum", "Constant"],
+        answer: 1,
+        explanation: "Work = Force x displacement. If displacement = 0, work = 0."
+      },
+      {
+        id: 12,
+        text: "Which is not a unit of energy?",
+        options: ["Calorie", "Joule", "Watt-hour", "Coulomb"],
+        answer: 3,
+        explanation: "Coulomb is a unit of electric charge, not energy."
+      }
+    ];
+
+    let selectedAnswers = Array(questions.length).fill(null);
+
+    function startQuiz() {
+      document.getElementById("registration").classList.add("hidden");
+      document.getElementById("quiz").classList.remove("hidden");
+      const container = document.getElementById("questionContainer");
+      container.innerHTML = "";
+      questions.forEach((q, index) => {
+        const qDiv = document.createElement("div");
+        qDiv.className = "question";
+        qDiv.innerHTML = `<p>${q.text}</p>` +
+          q.options.map((opt, i) => `
+            <div class="option" onclick="selectOption(${index}, ${i}, this)">
+              ${opt}
+            </div>`).join("");
+        container.appendChild(qDiv);
+      });
+    }
+
+    function selectOption(qIndex, optIndex, el) {
+      const questionDiv = el.parentNode;
+      const options = questionDiv.querySelectorAll(".option");
+      options.forEach(opt => opt.style.backgroundColor = "#3e3362");
+      el.style.backgroundColor = "#7b4dff";
+      selectedAnswers[qIndex] = optIndex;
+    }
+
+    function submitQuiz() {
+      let score = 0;
+      let explanationHTML = "";
+
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] === q.answer) {
+          score += 2;
+        } else {
+          explanationHTML += `<p><strong>Q${i + 1}:</strong> ${q.text}<br/><strong>Your Answer:</strong> ${q.options[selectedAnswers[i]] || "Not Answered"}<br/><strong>Correct Answer:</strong> ${q.options[q.answer]}<br/><em>${q.explanation}</em></p>`;
+        }
+      });
+
+      document.getElementById("quiz").classList.add("hidden");
+      document.getElementById("result").classList.remove("hidden");
+      document.getElementById("score").innerHTML = `<h3>Your Score: ${score}/${questions.length * 2}</h3>`;
+      document.getElementById("explanations").innerHTML = explanationHTML;
+    }
+  </script>
+</body>
+</html>
